@@ -23,14 +23,24 @@ const Hooks = {
         event.preventDefault()
         this.pushEvent('drop', {
           id: event.dataTransfer.getData('text/plain'),
-          x: event.clientX,
-          y: event.clientY,
+          x: event.clientX - 10,
+          y: event.clientY - 10,
         })
       }
     },
   },
   Drag: {
     mounted() {
+      this.el.onmousedown = (event) => {
+        this.el.classList.remove("cursor-grab");
+        this.el.classList.add("cursor-grabbing");
+      }
+
+      this.el.onmouseup = (event) => {
+        this.el.classList.remove("cursor-grabbing");
+        this.el.classList.add("cursor-grab");
+      }
+
       this.el.ondragover = (event) => {
         event.preventDefault()
       },
@@ -38,6 +48,7 @@ const Hooks = {
         console.log(event);
         console.log(this.el.id);
         event.dataTransfer.setData('text/plain', this.el.id);
+        event.dataTransfer.dropEffect = 'move';
       }
     },
   },

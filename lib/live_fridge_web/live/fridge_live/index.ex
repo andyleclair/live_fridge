@@ -120,15 +120,22 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   @impl true
   def handle_event("drop", %{"id" => id, "x" => x, "y" => y}, socket) do
     word = Map.get(socket.assigns, :most_used_words) |> Map.get(id)
-    {:noreply, assign(socket, most_used_words: Map.put(socket.assigns.most_used_words, id, %{word | x: x, y: y}))}
+
+    {:noreply,
+     assign(socket,
+       most_used_words: Map.put(socket.assigns.most_used_words, id, %{word | x: x, y: y})
+     )}
   end
 
   defp make_words() do
     @most_used_words
-      |> Enum.map(fn word ->
-    Ash.create!(LiveFridge.Fridge.Word, %{word: word, x: :rand.uniform(2500), y: :rand.uniform(2500)})
-end)
-      |> Map.new(fn word -> {word.id, word} end)
-        
+    |> Enum.map(fn word ->
+      Ash.create!(LiveFridge.Fridge.Word, %{
+        word: word,
+        x: :rand.uniform(2500),
+        y: :rand.uniform(2500)
+      })
+    end)
+    |> Map.new(fn word -> {word.id, word} end)
   end
 end
