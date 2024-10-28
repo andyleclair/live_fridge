@@ -1,10 +1,12 @@
 defmodule LiveFridgeWeb.Components.Word do
   use LiveFridgeWeb, :html
 
+  attr :word, :any, required: true
+
   def word(assigns) do
     ~H"""
-    <div draggable="true" class={"m-3 px-3 border absolute"} style={"top: #{@y}px; left: #{@x}px"}>
-      <span class=""><%= @word %></span>
+    <div id={@word.id} draggable="true" phx-hook="Drag" class={"m-3 px-3 border absolute cursor-grab"} style={"top: #{@word.y}px; left: #{@word.x}px"}>
+      <span class=""><%= @word.word %></span>
     </div>
     """
   end

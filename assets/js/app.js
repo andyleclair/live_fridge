@@ -15,6 +15,34 @@
 //     import "some-package"
 //
 
+const Hooks = {
+  Drop: {
+    mounted() {
+      this.el.ondrop = (event) => {
+        console.log(event);
+        event.preventDefault()
+        this.pushEvent('drop', {
+          id: event.dataTransfer.getData('text/plain'),
+          x: event.clientX,
+          y: event.clientY,
+        })
+      }
+    },
+  },
+  Drag: {
+    mounted() {
+      this.el.ondragover = (event) => {
+        event.preventDefault()
+      },
+      this.el.ondragstart = (event) => {
+        console.log(event);
+        console.log(this.el.id);
+        event.dataTransfer.setData('text/plain', this.el.id);
+      }
+    },
+  },
+}
+
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
@@ -25,7 +53,8 @@ import topbar from "../vendor/topbar"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: Hooks,
 })
 
 // Show progress bar on live navigation and form submits
