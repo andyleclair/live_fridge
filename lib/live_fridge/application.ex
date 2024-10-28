@@ -9,7 +9,6 @@ defmodule LiveFridge.Application do
   def start(_type, _args) do
     children = [
       LiveFridgeWeb.Telemetry,
-      LiveFridge.Repo,
       {DNSCluster, query: Application.get_env(:live_fridge, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: LiveFridge.PubSub},
       # Start the Finch HTTP client for sending emails

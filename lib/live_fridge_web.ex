@@ -43,8 +43,7 @@ defmodule LiveFridgeWeb do
         layouts: [html: LiveFridgeWeb.Layouts]
 
       import Plug.Conn
-      import LiveFridgeWeb.Gettext
-
+      use Gettext, backend: LiveFridgeWeb.Gettext
       unquote(verified_routes())
     end
   end
@@ -85,7 +84,7 @@ defmodule LiveFridgeWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import LiveFridgeWeb.CoreComponents
-      import LiveFridgeWeb.Gettext
+      use Gettext, backend: LiveFridgeWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

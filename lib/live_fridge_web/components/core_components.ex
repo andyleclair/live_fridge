@@ -17,7 +17,7 @@ defmodule LiveFridgeWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import LiveFridgeWeb.Gettext
+  use Gettext, backend: LiveFridgeWeb.Gettext
 
   @doc """
   Renders a modal.

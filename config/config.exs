@@ -38,7 +38,8 @@ config :spark,
 
 config :live_fridge,
   ecto_repos: [LiveFridge.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [LiveFridge.Fridge]
 
 # Configures the endpoint
 config :live_fridge, LiveFridgeWeb.Endpoint,

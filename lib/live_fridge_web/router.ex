@@ -17,7 +17,7 @@ defmodule LiveFridgeWeb.Router do
   scope "/", LiveFridgeWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", FridgeLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
