@@ -5,7 +5,7 @@ defmodule LiveFridge.Fridge.Word do
     data_layer: Ash.DataLayer.Ets
 
   actions do
-    defaults [:read, :destroy, create: [:word, :x, :y]]
+    defaults [:read, :destroy, create: [:word, :x, :y], update: [:x, :y]]
   end
 
   changes do

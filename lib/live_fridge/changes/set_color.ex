@@ -1,13 +1,13 @@
 defmodule LiveFridge.Changes.SetColor do
   use Ash.Resource.Change
   alias Ash.Changeset
-  
+
   @impl true
   def change(changeset, _opts, _context) do
-    color = 
+    color =
       changeset
       |> Changeset.get_attribute(:word)
-      |> ColorHash.hash() 
+      |> ColorHash.hash()
       |> ColorHash.hsl_to_string()
 
     Changeset.change_attribute(changeset, :color, color)
