@@ -4,4 +4,6 @@ defmodule LiveFridge.PubSubNotifier do
   def notify(%Ash.Notifier.Notification{action: %{type: :update}, data: data}) do
     Phoenix.PubSub.broadcast(LiveFridge.PubSub, "move_word", %{id: data.id, x: data.x, y: data.y})
   end
+
+  def notify(_), do: :ok
 end
