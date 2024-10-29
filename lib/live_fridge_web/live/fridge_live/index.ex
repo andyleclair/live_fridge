@@ -29,6 +29,19 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   end
 
   @impl true
+  def handle_event(
+        "move",
+        %{"id" => id, "x" => x, "y" => y},
+        %{assigns: %{all_words: all_words}} = socket
+      ) do
+    word = all_words[id]
+
+    Ash.update!(word, %{x: x, y: y})
+
+    {:noreply, assign(socket, all_words: Map.put(all_words, id, %{word | x: x, y: y}))}
+  end
+
+  @impl true
   def handle_info(%{id: id, x: x, y: y}, %{assigns: %{all_words: all_words}} = socket) do
     word = all_words[id]
     {:noreply, assign(socket, all_words: Map.put(all_words, id, %{word | x: x, y: y}))}

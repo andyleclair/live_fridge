@@ -14,6 +14,13 @@
 //
 //     import "some-package"
 //
+window.debounce = (func, timeout = 300) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
 
 const Hooks = {
   Drag: {
@@ -22,6 +29,8 @@ const Hooks = {
       let initialY = 0;
       let initialMouseX, initialMouseY, currentX, currentY;
 
+      const me = this;
+
       const mouseMove = (event) => {
         const newLeft = initialX + (event.pageX - initialMouseX);
         const newTop = initialY + (event.pageY - initialMouseY);
@@ -29,8 +38,9 @@ const Hooks = {
         currentX = newLeft;
         currentY = newTop;
 
-        this.el.style.left = `${newLeft}px`;
-        this.el.style.top = `${newTop}px`;
+        me.pushEvent("move", { id: me.el.id, x: newLeft, y: newTop });
+        me.el.style.left = `${newLeft}px`;
+        me.el.style.top = `${newTop}px`;
       }
 
       this.el.onmousedown = (event) => {
