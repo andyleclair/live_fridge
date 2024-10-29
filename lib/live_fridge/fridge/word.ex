@@ -2,7 +2,8 @@ defmodule LiveFridge.Fridge.Word do
   use Ash.Resource,
     otp_app: :live_fridge,
     domain: LiveFridge.Fridge,
-    data_layer: Ash.DataLayer.Ets
+    data_layer: Ash.DataLayer.Ets,
+    notifiers: [LiveFridge.PubSubNotifier]
 
   actions do
     defaults [:read, :destroy, create: [:word, :x, :y], update: [:x, :y]]

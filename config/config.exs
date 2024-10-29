@@ -10,7 +10,8 @@ import Config
 config :ash,
   include_embedded_source_by_default?: false,
   default_page_type: :keyset,
-  policies: [no_filter_static_forbidden_reads?: false]
+  policies: [no_filter_static_forbidden_reads?: false],
+  pub_sub: [debug?: true]
 
 config :spark,
   formatter: [

@@ -11,6 +11,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    Phoenix.PubSub.subscribe(LiveFridge.PubSub, "move_word")
     {:ok, assign(socket, all_words: all_words())}
   end
 
@@ -23,6 +24,15 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
     {:noreply,
      assign(socket,
        all_words: Map.put(all_words, id, %{word | x: x, y: y})
+     )}
+  end
+
+  @impl true
+  def handle_info(%{id: id, x: x, y: y}, socket) do
+    word = socket.assigns.all_words[id]
+    {:noreply,
+     assign(socket,
+       all_words: Map.put(socket.assigns.all_words, id, %{word | x: x, y: y})
      )}
   end
 
