@@ -3,3 +3,24 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+body {
+  user-select: none;
+}
+
+main {
+  width: 8000px;
+  height: 8000px;
+}
+
+.word:hover {
+  animation: jiggle .5s infinite;
+}
+
+@keyframes jiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0eg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+

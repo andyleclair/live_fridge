@@ -7,10 +7,9 @@ defmodule LiveFridgeWeb.Components.Word do
     ~H"""
     <div
       id={@word.id}
-      draggable="true"
       phx-hook="Drag"
-      class="m-3 px-3 border absolute cursor-grab"
-      style={"top: #{@word.y}px; left: #{@word.x}px; box-shadow: 3px 3px 0 0 #{@word.word |> ColorHash.hash() |> ColorHash.hsl_to_string()}"}
+      class="word px-4 py-1 border absolute cursor-grab bg-white"
+      style={"top: #{@word.y}px; left: #{@word.x}px; box-shadow: 3px 3px 0 0 #{@word.color}"}
     >
       <span class=""><%= @word.word %></span>
     </div>

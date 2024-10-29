@@ -8,6 +8,10 @@ defmodule LiveFridge.Fridge.Word do
     defaults [:read, :destroy, create: [:word, :x, :y]]
   end
 
+  changes do
+    change LiveFridge.Changes.SetColor, on: :create
+  end
+
   attributes do
     uuid_v7_primary_key :id
 
@@ -22,6 +26,11 @@ defmodule LiveFridge.Fridge.Word do
     end
 
     attribute :y, :integer do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :color, :string do
       allow_nil? false
       public? true
     end

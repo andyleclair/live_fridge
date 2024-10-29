@@ -16,39 +16,38 @@
 //
 
 const Hooks = {
-  Drop: {
-    mounted() {
-      this.el.ondrop = (event) => {
-        console.log(event);
-        event.preventDefault()
-        this.pushEvent('drop', {
-          id: event.dataTransfer.getData('text/plain'),
-          x: event.clientX - 10,
-          y: event.clientY - 10,
-        })
-      }
-    },
-  },
   Drag: {
     mounted() {
+      let initialX = 0;
+      let initialY = 0;
+      let initialMouseX, initialMouseY, currentX, currentY;
+
+      const mouseMove = (event) => {
+        const newLeft = initialX + (event.pageX - initialMouseX);
+        const newTop = initialY + (event.pageY - initialMouseY);
+
+        currentX = newLeft;
+        currentY = newTop;
+
+        this.el.style.left = `${newLeft}px`;
+        this.el.style.top = `${newTop}px`;
+      }
+
       this.el.onmousedown = (event) => {
         this.el.classList.remove("cursor-grab");
         this.el.classList.add("cursor-grabbing");
+        document.onmousemove = mouseMove;
+        initialMouseX = event.pageX;
+        initialMouseY = event.pageY;
+        initialX = this.el.offsetLeft;
+        initialY = this.el.offsetTop;
       }
 
       this.el.onmouseup = (event) => {
         this.el.classList.remove("cursor-grabbing");
         this.el.classList.add("cursor-grab");
-      }
-
-      this.el.ondragover = (event) => {
-        event.preventDefault()
-      },
-      this.el.ondragstart = (event) => {
-        console.log(event);
-        console.log(this.el.id);
-        event.dataTransfer.setData('text/plain', this.el.id);
-        event.dataTransfer.dropEffect = 'move';
+        document.onmousemove = null;
+        this.pushEvent("drop", { id: this.el.id, x: currentX, y: currentY });
       }
     },
   },
