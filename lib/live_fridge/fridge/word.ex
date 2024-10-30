@@ -13,6 +13,10 @@ defmodule LiveFridge.Fridge.Word do
     change LiveFridge.Changes.SetColor, on: :create
   end
 
+  validations do
+    validate {LiveFridge.Validations.IsProfanity, []}, on: :create
+  end
+
   attributes do
     uuid_v7_primary_key :id
 

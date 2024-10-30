@@ -33,6 +33,7 @@ defmodule LiveFridge.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:expletive, "~> 0.1"},
       {:ash, "~> 3.0"},
       {:igniter, "~> 0.3"},
       {:phoenix, "~> 1.7.14"},
