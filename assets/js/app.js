@@ -14,13 +14,6 @@
 //
 //     import "some-package"
 //
-window.debounce = (func, timeout = 300) => {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-  };
-}
 
 const Hooks = {
   Drag: {
@@ -57,7 +50,7 @@ const Hooks = {
         this.el.classList.remove("cursor-grabbing");
         this.el.classList.add("cursor-grab");
         document.onmousemove = null;
-        this.pushEvent("drop", { id: this.el.id, x: currentX, y: currentY });
+        this.pushEvent("move", { id: this.el.id, x: currentX, y: currentY });
       }
     },
   },

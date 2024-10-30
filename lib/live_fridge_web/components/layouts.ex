@@ -11,4 +11,15 @@ defmodule LiveFridgeWeb.Layouts do
   use LiveFridgeWeb, :html
 
   embed_templates "layouts/*"
+
+  attr :href, :string, required: true
+  slot :inner_block, required: true
+
+  def ext_link(assigns) do
+    ~H"""
+    <a href={@href} target="_blank" class="underline">
+      <%= render_slot(@inner_block) %>
+    </a>
+    """
+  end
 end

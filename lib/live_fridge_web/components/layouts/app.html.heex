@@ -1,7 +1,32 @@
 <main id="main">
   <div class="">
     <.flash_group flash={@flash} />
-    <div>LiveView Fridge - Place Ya Magnets</div>
+    <div class="w-screen flex justify-center">
+      <div class="flex-col p-4 rounded-md border-2 mt-48 w-1/2">
+        <.header class="mb-2">
+          LiveView Fridge Poetry
+          <:subtitle>
+            A Phoenix LiveView reimplementation of
+            <.ext_link href="https://playhtml.fun">playhtml's</.ext_link>
+            <.ext_link href="https://playhtml.fun/fridge.html">fridge poetry</.ext_link>.
+            <.ext_link href="https://github.com/andyleclair/live_fridge">Source code</.ext_link>
+          </:subtitle>
+        </.header>
+        <p>
+          The premise is the same, drag words around to make poems! Leave them for others to find later and come back to see how people have changed the fridge.
+        </p>
+        <p>
+          Please be nice. We're all just people on the other side of the screen.
+        </p>
+        <p>
+          What's something you'd want to see on your fridge wall every morning?
+        </p>
+        <p>
+          Remember
+          <.ext_link href="https://imgur.com/bHnICCZ">Practice Guide for Computer</.ext_link>.
+        </p>
+      </div>
+    </div>
     <div class="">
       <%= @inner_content %>
     </div>
