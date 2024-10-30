@@ -71,8 +71,8 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
       {:error, changeset} ->
         {:noreply,
          socket
-         |> assign(new_word_form: new_form())
-         |> put_flash(:error, "Failed to add word: #{Enum.map_join(changeset.errors, ", ", &(&1.message))}")}
+         |> assign(new_word_form: new_form(), errors: changeset.errors)
+         |> put_flash(:error, "Failed to add word")}
     end
   end
 
