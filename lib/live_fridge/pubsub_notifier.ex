@@ -14,5 +14,9 @@ defmodule LiveFridge.PubSubNotifier do
     Phoenix.PubSub.broadcast(LiveFridge.PubSub, "word", %{event: :create, word: data})
   end
 
+  def notify(%Ash.Notifier.Notification{action: %{type: :destroy}, data: data}) do
+    Phoenix.PubSub.broadcast(LiveFridge.PubSub, "word", %{event: :destroy, id: data.id})
+  end
+
   def notify(_), do: :ok
 end

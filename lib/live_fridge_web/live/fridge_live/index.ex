@@ -4,23 +4,55 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
-      :for={{id, word} <- @all_words}
-      id={id}
-      phx-hook="Drag"
-      class="word px-4 py-1 border absolute cursor-grab bg-white"
-      style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
-    >
-      <span class=""><%= word.word %></span>
-    </div>
+    <%= if @deleting do %>
+      <div
+        :for={{id, word} <- @all_words}
+        id={"deleting-#{id}"}
+        class="word border-2 border-dashed border-rose-500 absolute bg-white"
+        style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
+      >
+        <div class="relative px-4 py-1 w-auto h-auto">
+          <div
+            class="w-5 h-5 flex items-center justify-center text-center absolute -top-2 -right-2 rounded-full cursor-pointer z-10 border border-red-500 bg-white hover:bg-rose-500"
+            phx-click={
+              JS.push("delete_word_#{id}")
+              |> JS.hide(
+                transition: {"ease-out duration-300", "opacity-100", "opacity-0"},
+                to: "#deleting-#{id}"
+              )
+            }
+          >
+            <.icon name="hero-x-mark" class="bg-rose-500 self-stretch hover:bg-white" />
+          </div>
+          <span><%= word.word %></span>
+        </div>
+      </div>
+    <% else %>
+      <div
+        :for={{id, word} <- @all_words}
+        id={id}
+        phx-hook="Drag"
+        class="word px-4 py-1 border-2 absolute cursor-grab bg-white"
+        style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
+      >
+        <span><%= word.word %></span>
+      </div>
+    <% end %>
 
     <div class="fixed bottom-0 right-0 m-5 p-4">
-      <.form for={@new_word_form} phx-change="change_word" phx-submit="add_word" phx-debounce="200">
-        <div class="flex items-end gap-2">
-          <.input field={@new_word_form["word"]} label="Add Word" />
-          <.button class="" type="submit">Add</.button>
-        </div>
-      </.form>
+      <div class="flex flex-col gap-2">
+        <.form for={@new_word_form} phx-change="change_word" phx-submit="add_word" phx-debounce="200">
+          <div class="flex items-end gap-2">
+            <.input field={@new_word_form["word"]} label="Add Word" />
+            <.button type="submit">Add</.button>
+          </div>
+        </.form>
+        <%= if @deleting do %>
+          <.button phx-click="toggle_delete_mode" class="bg-blue-800">Cancel</.button>
+        <% else %>
+          <.button phx-click="toggle_delete_mode" class="bg-rose-800">Delete</.button>
+        <% end %>
+      </div>
     </div>
 
     <div class="fixed bottom-0 left-0 m-5 p-4">
@@ -44,6 +76,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
      socket
      |> assign(all_words: all_words())
      |> assign(users_online: LiveFridge.ConnectionCounter.get())
+     |> assign(deleting: true)
      |> assign(new_word_form: new_form())}
   end
 
@@ -57,11 +90,23 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
     Ash.update!(word, %{x: x, y: y})
 
-    {:noreply,
-     assign(socket,
-       users_online: LiveFridge.ConnectionCounter.get(),
-       all_words: Map.put(all_words, id, %{word | x: x, y: y})
-     )}
+    {:noreply, assign(socket, all_words: Map.put(all_words, id, %{word | x: x, y: y}))}
+  end
+
+  @impl true
+  def handle_event("toggle_delete_mode", _params, socket) do
+    {:noreply, assign(socket, deleting: !socket.assigns.deleting)}
+  end
+
+  @impl true
+  def handle_event(
+        "delete_word_" <> id,
+        _params,
+        %{assigns: %{all_words: all_words}} = socket
+      ) do
+    word = all_words[id]
+    Ash.destroy!(word)
+    {:noreply, assign(socket, all_words: Map.delete(all_words, id))}
   end
 
   # You might think, "andy, you're just setting the form to the value that's set on the form" and
@@ -108,6 +153,11 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   @impl true
   def handle_info(%{event: :create, word: word}, %{assigns: %{all_words: all_words}} = socket) do
     {:noreply, assign(socket, all_words: Map.put(all_words, word.id, word))}
+  end
+
+  @impl true
+  def handle_info(%{event: :destroy, id: id}, %{assigns: %{all_words: all_words}} = socket) do
+    {:noreply, assign(socket, all_words: Map.delete(all_words, id))}
   end
 
   @impl true
