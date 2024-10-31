@@ -22,16 +22,28 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
         </div>
       </.form>
     </div>
+
+    <div class="fixed bottom-0 left-0 m-5 p-4">
+      <div class="flex items-center gap-2">
+        <.icon name="hero-bolt-solid" class="bg-green-500" />
+        <%= @users_online %> poets online
+      </div>
+    </div>
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
-    Phoenix.PubSub.subscribe(LiveFridge.PubSub, "word")
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "word")
+      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "user")
+      LiveFridge.ConnectionCounter.incr()
+    end
 
     {:ok,
      socket
      |> assign(all_words: all_words())
+     |> assign(users_online: LiveFridge.ConnectionCounter.get())
      |> assign(new_word_form: new_form())}
   end
 
@@ -45,9 +57,17 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
     Ash.update!(word, %{x: x, y: y})
 
-    {:noreply, assign(socket, all_words: Map.put(all_words, id, %{word | x: x, y: y}))}
+    {:noreply,
+     assign(socket,
+       users_online: LiveFridge.ConnectionCounter.get(),
+       all_words: Map.put(all_words, id, %{word | x: x, y: y})
+     )}
   end
 
+  # You might think, "andy, you're just setting the form to the value that's set on the form" and
+  # you would be right! however, if you don't set the value _here_ in _Phoenix_, then Phoenix doesn't know
+  # the form has changed, and when you submit the form, the form field won't get cleared. This is a bit of
+  # LiveView that you sorta just need to get used to.
   @impl true
   def handle_event("change_word", %{"word" => word}, socket) do
     {:noreply, assign(socket, new_word_form: to_form(%{"word" => word}))}
@@ -88,6 +108,11 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   @impl true
   def handle_info(%{event: :create, word: word}, %{assigns: %{all_words: all_words}} = socket) do
     {:noreply, assign(socket, all_words: Map.put(all_words, word.id, word))}
+  end
+
+  @impl true
+  def handle_info(%{event: :user_left}, socket) do
+    {:noreply, assign(socket, users_online: LiveFridge.ConnectionCounter.get())}
   end
 
   defp all_words do

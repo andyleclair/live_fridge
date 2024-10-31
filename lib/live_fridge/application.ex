@@ -13,6 +13,7 @@ defmodule LiveFridge.Application do
       {Phoenix.PubSub, name: LiveFridge.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: LiveFridge.Finch},
+      LiveFridge.ConnectionCounter,
       # Start a worker by calling: LiveFridge.Worker.start_link(arg)
       # {LiveFridge.Worker, arg},
       # Start to serve requests, typically the last entry
