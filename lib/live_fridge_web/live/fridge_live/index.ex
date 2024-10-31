@@ -115,6 +115,11 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
     {:noreply, assign(socket, users_online: LiveFridge.ConnectionCounter.get())}
   end
 
+  @impl true
+  def handle_info(%{event: :user_joined}, socket) do
+    {:noreply, assign(socket, users_online: LiveFridge.ConnectionCounter.get())}
+  end
+
   defp all_words do
     Ash.read!(LiveFridge.Fridge.Word)
     |> Map.new(&{&1.id, &1})

@@ -1,45 +1,49 @@
 defmodule LiveFridge.ConnectionCounter do
   @moduledoc """
-  Obviously this doesn't scale well! 
+  Scalable connection counter using persistent_term and counters.
+   
+  It could be _more_ scalable if I hook this up so there's a global counter and 
+  a local counter (a la this thread here: https://elixirforum.com/t/implementing-a-distributed-users-counter/39609/2 )
+  but this should be fine for now. I do NOT plan on running several servers for this 
+  cute toy
   """
   use GenServer
 
-  @impl true
-  def init(_) do
+  def init_counter() do
     ref = :counters.new(1, [:atomics])
-    {:ok, ref}
+    # now we're cooking with gas baby
+    :persistent_term.put(__MODULE__, ref)
   end
 
   def incr() do
-    GenServer.call(__MODULE__, {:incr})
+    __MODULE__ |> :persistent_term.get() |> :counters.add(1, 1)
+
+    DynamicSupervisor.start_child(
+      {:via, PartitionSupervisor, {LiveFridge.PartitionSupervisor, self()}},
+      {__MODULE__, self()}
+    )
+
+    :ok
   end
 
   def get() do
-    GenServer.call(__MODULE__, {:get})
+    __MODULE__ |> :persistent_term.get() |> :counters.get(1)
   end
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
-  end
-
-  # Nice side-effect of GenServer here is I don't have to pass 
-  # self() in to `incr()`, it is provided!
-  @impl true
-  def handle_call({:incr}, {from, _}, ref) do
-    :counters.add(ref, 1, 1)
-    Process.monitor(from)
-    {:reply, :ok, ref}
+  def start_link(pid) do
+    GenServer.start_link(__MODULE__, [pid], name: __MODULE__)
   end
 
   @impl true
-  def handle_call({:get}, _from, ref) do
-    count = :counters.get(ref, 1)
-    {:reply, count, ref}
+  def init([pid]) do
+    Phoenix.PubSub.broadcast(LiveFridge.PubSub, "user", %{event: :user_joined})
+    Process.monitor(pid)
+    {:ok, []}
   end
 
   @impl true
   def handle_info({:DOWN, _, _, _, _}, ref) do
-    :counters.sub(ref, 1, 1)
+    __MODULE__ |> :persistent_term.get() |> :counters.sub(1, 1)
     Phoenix.PubSub.broadcast(LiveFridge.PubSub, "user", %{event: :user_left})
     {:noreply, ref}
   end

@@ -7,13 +7,15 @@ defmodule LiveFridge.Application do
 
   @impl true
   def start(_type, _args) do
+    :ok = LiveFridge.ConnectionCounter.init_counter()
+
     children = [
       LiveFridgeWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:live_fridge, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: LiveFridge.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: LiveFridge.Finch},
-      LiveFridge.ConnectionCounter,
+      {PartitionSupervisor, child_spec: DynamicSupervisor, name: LiveFridge.PartitionSupervisor},
       # Start a worker by calling: LiveFridge.Worker.start_link(arg)
       # {LiveFridge.Worker, arg},
       # Start to serve requests, typically the last entry
