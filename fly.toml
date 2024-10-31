@@ -10,7 +10,6 @@ kill_signal = 'SIGTERM'
 [build]
 
 [deploy]
-  release_command = '/app/bin/migrate'
 
 [env]
   PHX_HOST = 'live-fridge.fly.dev'
