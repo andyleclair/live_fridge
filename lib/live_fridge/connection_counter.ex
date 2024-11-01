@@ -23,6 +23,8 @@ defmodule LiveFridge.ConnectionCounter do
       {__MODULE__, self()}
     )
 
+    Phoenix.PubSub.local_broadcast_from(LiveFridge.PubSub, self(), "user", %{event: :user_joined})
+
     :ok
   end
 
@@ -31,20 +33,20 @@ defmodule LiveFridge.ConnectionCounter do
   end
 
   def start_link(pid) do
-    GenServer.start_link(__MODULE__, [pid], name: __MODULE__)
+    GenServer.start_link(__MODULE__, [pid])
   end
 
   @impl true
   def init([pid]) do
-    Phoenix.PubSub.broadcast(LiveFridge.PubSub, "user", %{event: :user_joined})
     Process.monitor(pid)
-    {:ok, []}
+    {:ok, pid}
   end
 
   @impl true
-  def handle_info({:DOWN, _, _, _, _}, ref) do
+  def handle_info({:DOWN, _, _, _, _}, pid) do
+    dbg(pid)
     __MODULE__ |> :persistent_term.get() |> :counters.sub(1, 1)
-    Phoenix.PubSub.broadcast(LiveFridge.PubSub, "user", %{event: :user_left})
-    {:noreply, ref}
+    Phoenix.PubSub.local_broadcast_from(LiveFridge.PubSub, pid, "user", %{event: :user_left})
+    {:noreply, pid}
   end
 end
