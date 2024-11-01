@@ -10,14 +10,12 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
         id={"deleting-#{id}"}
         class="border-2 border-dashed border-rose-500 absolute bg-white"
         style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
+        phx-remove={JS.hide(transition: "fade-out-scale")}
       >
         <div class="relative px-4 py-1 w-auto h-auto">
           <div
             class="w-5 h-5 flex items-center justify-center text-center absolute -top-2 -right-2 rounded-full cursor-pointer z-10 border border-red-500 bg-white hover:bg-rose-500"
-            phx-click={
-              JS.push("delete_word_#{id}")
-              |> JS.hide(transition: "fade-out-scale", to: "#deleting-#{id}")
-            }
+            phx-click={"delete_word_#{id}"}
           >
             <.icon name="hero-x-mark" class="bg-rose-500 self-stretch hover:bg-white" />
           </div>
