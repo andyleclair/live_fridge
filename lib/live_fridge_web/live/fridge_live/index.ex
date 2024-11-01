@@ -30,12 +30,13 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
         class="word px-4 py-1 border-2 absolute cursor-grab bg-white"
         style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
         phx-remove={JS.hide(transition: "fade-out-scale")}
+        phx-mounted={JS.transition("animate-ping", time: 100)}
       >
         <span><%= word.word %></span>
       </div>
     <% end %>
 
-    <div class="fixed bottom-0 right-0 m-5 p-4 bg-white z-10 rounded-md">
+    <div class="fixed bottom-0 right-0 m-5 p-4 bg-white z-10 rounded-md shadow-md">
       <div class="flex flex-col gap-2">
         <.form for={@new_word_form} phx-change="change_word" phx-submit="add_word" phx-debounce="200">
           <div class="flex items-end gap-2">
@@ -55,31 +56,58 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
       </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 m-5 p-4">
-      <div class="flex items-center gap-2">
-        <.icon name="hero-bolt-solid" class="bg-green-500" />
-        <%= @users_online %> poets online
+    <div class="fixed bottom-0 left-0 m-5 p-4 bg-white z-10 rounded-md shadow-md">
+      <div class="flex flex-col gap-4">
+        <.form
+          for={@fridge_form}
+          phx-change="change_fridge"
+          phx-submit="switch_fridge"
+          phx-debounce="200"
+        >
+          <div class="flex items-end gap-2">
+            <.input field={@fridge_form["fridge"]} label="Change Fridge" />
+            <.button type="submit">Go</.button>
+          </div>
+        </.form>
+
+        <div class="flex items-center gap-2">
+          <.icon name="hero-bolt-solid" class="bg-green-500" />
+          <%= @users_online %> poets online
+        </div>
       </div>
     </div>
     """
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
-      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "word")
-      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "user")
       LiveFridge.ConnectionCounter.incr()
+
+      {fridge, all_words} = all_words(params["fridge"])
+
+      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "word:#{fridge.id}")
+      Phoenix.PubSub.subscribe(LiveFridge.PubSub, "user")
+
+      {:ok,
+       socket
+       |> assign(fridge: fridge)
+       |> assign(all_words: all_words)
+       |> assign(users_online: LiveFridge.ConnectionCounter.get())
+       |> assign(deleting: false)
+       |> assign(new_word_form: new_form())
+       |> assign(fridge_form: new_fridge_form())}
+    else
+      maybe_seed_database!()
+
+      {:ok,
+       socket
+       |> assign(all_words: [])
+       |> assign(users_online: 0)
+       |> assign(deleting: false)
+       |> assign(new_word_form: new_form())
+       |> assign(fridge_form: new_fridge_form())}
     end
-
-    maybe_seed_database!()
-
-    {:ok,
-     socket
-     |> assign(all_words: all_words())
-     |> assign(users_online: LiveFridge.ConnectionCounter.get())
-     |> assign(deleting: false)
-     |> assign(new_word_form: new_form())}
   end
 
   @impl true
@@ -144,6 +172,23 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   end
 
   @impl true
+  def handle_event("change_fridge", %{"fridge" => fridge}, socket) do
+    {:noreply, assign(socket, fridge_form: to_form(%{"fridge" => fridge}))}
+  end
+
+  def handle_event("switch_fridge", %{"fridge" => ""}, socket) do
+    Phoenix.PubSub.unsubscribe(LiveFridge.PubSub, "word:#{socket.assigns.fridge.id}")
+    Phoenix.PubSub.unsubscribe(LiveFridge.PubSub, "user")
+    {:noreply, push_navigate(socket, to: ~p"/")}
+  end
+
+  def handle_event("switch_fridge", params, socket) do
+    Phoenix.PubSub.unsubscribe(LiveFridge.PubSub, "word:#{socket.assigns.fridge.id}")
+    Phoenix.PubSub.unsubscribe(LiveFridge.PubSub, "user")
+    {:noreply, push_navigate(socket, to: ~p"/?#{params}")}
+  end
+
+  @impl true
   def handle_info(
         %{event: :update, id: id, x: x, y: y},
         %{assigns: %{all_words: all_words}} = socket
@@ -172,9 +217,17 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
     {:noreply, assign(socket, users_online: LiveFridge.ConnectionCounter.get())}
   end
 
-  defp all_words do
-    Ash.read!(LiveFridge.Fridge.Word)
-    |> Map.new(&{&1.id, &1})
+  @default_fridge "The Fridge"
+  defp all_words(fridge_name) do
+    fridge_name = if fridge_name, do: fridge_name, else: @default_fridge
+
+    case Ash.get(LiveFridge.Fridge.Fridge, name: fridge_name) do
+      {:ok, fridge} ->
+        {fridge, Map.new(fridge.words, &{&1.id, &1})}
+
+      {:error, _} ->
+        LiveFridge.Seeds.create_fridge(fridge_name)
+    end
   end
 
   defp rand_coordinate do
@@ -183,6 +236,10 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
   defp new_form do
     to_form(%{"word" => ""})
+  end
+
+  defp new_fridge_form do
+    to_form(%{"fridge" => ""})
   end
 
   defp maybe_seed_database! do

@@ -6,7 +6,7 @@ defmodule LiveFridge.Fridge.Word do
     notifiers: [LiveFridge.PubSubNotifier]
 
   actions do
-    defaults [:read, :destroy, create: [:word, :x, :y], update: [:x, :y]]
+    defaults [:read, :destroy, create: [:fridge_id, :word, :x, :y], update: [:x, :y]]
   end
 
   changes do
@@ -50,5 +50,12 @@ defmodule LiveFridge.Fridge.Word do
     end
 
     timestamps()
+  end
+
+  relationships do
+    belongs_to :fridge, LiveFridge.Fridge.Fridge do
+      public? true
+      attribute_writable? true
+    end
   end
 end

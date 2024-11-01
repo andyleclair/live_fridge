@@ -3,5 +3,6 @@ defmodule LiveFridge.Fridge do
 
   resources do
     resource LiveFridge.Fridge.Word
+    resource LiveFridge.Fridge.Fridge
   end
 end

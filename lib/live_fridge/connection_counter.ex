@@ -44,7 +44,6 @@ defmodule LiveFridge.ConnectionCounter do
 
   @impl true
   def handle_info({:DOWN, _, _, _, _}, pid) do
-    dbg(pid)
     __MODULE__ |> :persistent_term.get() |> :counters.sub(1, 1)
     Phoenix.PubSub.local_broadcast_from(LiveFridge.PubSub, pid, "user", %{event: :user_left})
     {:noreply, pid}

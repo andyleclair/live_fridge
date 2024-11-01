@@ -103,12 +103,40 @@ defmodule LiveFridge.Seeds do
   )
 
   def run() do
+    fridge =
+      Ash.create!(LiveFridge.Fridge.Fridge, %{
+        name: "The Fridge"
+      })
+
     Enum.each(@most_used_words, fn word ->
       Ash.create!(LiveFridge.Fridge.Word, %{
+        fridge_id: fridge.id,
         word: word,
         x: :rand.uniform(2500),
         y: :rand.uniform(2500)
       })
     end)
+  end
+
+  def create_fridge(fridge_name) do
+    fridge =
+      Ash.create!(LiveFridge.Fridge.Fridge, %{
+        name: fridge_name
+      })
+
+    words =
+      Map.new(@most_used_words, fn word ->
+        word =
+          Ash.create!(LiveFridge.Fridge.Word, %{
+            fridge_id: fridge.id,
+            word: word,
+            x: :rand.uniform(2500),
+            y: :rand.uniform(2500)
+          })
+
+        {word.id, word}
+      end)
+
+    {fridge, words}
   end
 end
