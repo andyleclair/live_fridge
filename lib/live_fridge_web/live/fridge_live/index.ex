@@ -72,6 +72,8 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
       LiveFridge.ConnectionCounter.incr()
     end
 
+    maybe_seed_database!()
+
     {:ok,
      socket
      |> assign(all_words: all_words())
@@ -181,5 +183,11 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
   defp new_form do
     to_form(%{"word" => ""})
+  end
+
+  defp maybe_seed_database! do
+    if Ash.count!(LiveFridge.Fridge.Word) == 0 do
+      LiveFridge.Seeds.run()
+    end
   end
 end
