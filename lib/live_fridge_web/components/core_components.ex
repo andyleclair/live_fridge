@@ -223,6 +223,7 @@ defmodule LiveFridgeWeb.CoreComponents do
   attr :type, :string, default: nil
   attr :class, :string, default: nil
   attr :rest, :global, include: ~w(disabled form name value)
+  attr :background, :string, default: "bg-zinc-900 hover:bg-zinc-700", doc: "the background color"
 
   slot :inner_block, required: true
 
@@ -231,8 +232,9 @@ defmodule LiveFridgeWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
+        "phx-submit-loading:opacity-75 rounded-lg py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
+        @background,
         @class
       ]}
       {@rest}

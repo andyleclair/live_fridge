@@ -24,3 +24,16 @@ main {
   100% { transform: rotate(0deg); }
 }
 
+@keyframes fade-out-scale {
+	100% {
+		transform: scale(0.4);
+		opacity: 0;
+	}
+}
+
+.fade-out-scale {
+	opacity: 1;
+	animation: fade-out-scale .2s ease-in;
+	animation-fill-mode: forwards;
+}
+

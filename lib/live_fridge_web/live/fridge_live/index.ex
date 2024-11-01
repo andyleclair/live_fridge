@@ -8,7 +8,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
       <div
         :for={{id, word} <- @all_words}
         id={"deleting-#{id}"}
-        class="word border-2 border-dashed border-rose-500 absolute bg-white"
+        class="border-2 border-dashed border-rose-500 absolute bg-white"
         style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
       >
         <div class="relative px-4 py-1 w-auto h-auto">
@@ -16,10 +16,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
             class="w-5 h-5 flex items-center justify-center text-center absolute -top-2 -right-2 rounded-full cursor-pointer z-10 border border-red-500 bg-white hover:bg-rose-500"
             phx-click={
               JS.push("delete_word_#{id}")
-              |> JS.hide(
-                transition: {"ease-out duration-300", "opacity-100", "opacity-0"},
-                to: "#deleting-#{id}"
-              )
+              |> JS.hide(transition: "fade-out-scale", to: "#deleting-#{id}")
             }
           >
             <.icon name="hero-x-mark" class="bg-rose-500 self-stretch hover:bg-white" />
@@ -34,12 +31,13 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
         phx-hook="Drag"
         class="word px-4 py-1 border-2 absolute cursor-grab bg-white"
         style={"top: #{word.y}px; left: #{word.x}px; box-shadow: 3px 3px 0 0 #{word.color}"}
+        phx-remove={JS.hide(transition: "fade-out-scale")}
       >
         <span><%= word.word %></span>
       </div>
     <% end %>
 
-    <div class="fixed bottom-0 right-0 m-5 p-4">
+    <div class="fixed bottom-0 right-0 m-5 p-4 bg-white z-10 rounded-md">
       <div class="flex flex-col gap-2">
         <.form for={@new_word_form} phx-change="change_word" phx-submit="add_word" phx-debounce="200">
           <div class="flex items-end gap-2">
@@ -48,9 +46,13 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
           </div>
         </.form>
         <%= if @deleting do %>
-          <.button phx-click="toggle_delete_mode" class="bg-blue-800">Cancel</.button>
+          <.button phx-click="toggle_delete_mode" background="bg-blue-800 hover:bg-blue-600">
+            Cancel
+          </.button>
         <% else %>
-          <.button phx-click="toggle_delete_mode" class="bg-rose-800">Delete</.button>
+          <.button phx-click="toggle_delete_mode" background="bg-rose-500 hover:bg-rose-600">
+            Delete
+          </.button>
         <% end %>
       </div>
     </div>
@@ -76,7 +78,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
      socket
      |> assign(all_words: all_words())
      |> assign(users_online: LiveFridge.ConnectionCounter.get())
-     |> assign(deleting: true)
+     |> assign(deleting: false)
      |> assign(new_word_form: new_form())}
   end
 
