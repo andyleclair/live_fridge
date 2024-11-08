@@ -124,6 +124,11 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   end
 
   @impl true
+  def handle_event("move", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("toggle_delete_mode", _params, socket) do
     {:noreply, assign(socket, deleting: !socket.assigns.deleting)}
   end
