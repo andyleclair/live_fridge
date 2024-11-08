@@ -102,6 +102,7 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
 
       {:ok,
        socket
+       |> assign(fridge: nil)
        |> assign(all_words: [])
        |> assign(users_online: 0)
        |> assign(deleting: false)
@@ -154,11 +155,16 @@ defmodule LiveFridgeWeb.FridgeLive.Index do
   end
 
   @impl true
-  def handle_event("add_word", %{"word" => word}, %{assigns: %{all_words: all_words}} = socket) do
+  def handle_event(
+        "add_word",
+        %{"word" => word},
+        %{assigns: %{all_words: all_words, fridge: fridge}} = socket
+      ) do
     case Ash.create(LiveFridge.Fridge.Word, %{
            word: word,
            x: rand_coordinate(),
-           y: rand_coordinate()
+           y: rand_coordinate(),
+           fridge_id: fridge.id
          }) do
       {:ok, word} ->
         {:noreply,
